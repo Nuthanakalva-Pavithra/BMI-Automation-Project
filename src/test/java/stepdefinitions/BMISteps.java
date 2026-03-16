@@ -1,11 +1,22 @@
 package stepdefinitions;
 
+import java.time.Duration;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-import io.cucumber.java.en.*;
+//import org.openqa.selenium.edge.EdgeDriver;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import pages.BMIPage;
+import utils.ConfigReader;
 
 public class BMISteps {
 
@@ -14,11 +25,20 @@ public class BMISteps {
 
     @Given("user opens BMI website")
     public void user_opens_bmi_website() {
-
-        driver = new ChromeDriver();
+    	ConfigReader config=new ConfigReader();
+    	String browser=config.getBrowser();
+    	
+    	if(browser.equalsIgnoreCase("chrome")) {
+    		driver=new ChromeDriver();
+    	}
+    	else if(browser.equalsIgnoreCase("edge")) {
+    		driver=new EdgeDriver();
+    	}
+    	else if(browser.equalsIgnoreCase("firefox")) {
+    		driver=new FirefoxDriver();
+    	}
         driver.manage().window().maximize();
-        driver.get("https://stalwart-crostata-c590d8.netlify.app/");
-
+        driver.get(config.getURL());
         page = new BMIPage(driver);
     }
 
@@ -58,7 +78,9 @@ public class BMISteps {
 
     @Then("BMI result should be displayed")
     public void bmi_result_should_be_displayed() {
-
+    	
+    	WebDriverWait wait=new WebDriverWait(driver,Duration.ofSeconds(10));
+    	wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h3[normalize-space()='Your BMI Result']")));
         String result = page.getBMIResult();
         System.out.println("BMI Result: " + result);
 
